@@ -1,0 +1,16 @@
+name: FountOfEvil
+main: com.hideyourfire.ralphhogaboom.FountOfEvil.Main
+version: Aloha build 20141229_43-DEBUG
+depend: [SQLibrary]
+permissions:
+    fountofevil.admin:
+        description: Null
+        default: false
+    fountofevil.player:
+        description: Null
+        default: false
+commands:
+   fount:
+      description: Creates a new custom spawn location for a specific mob type.
+      usage: Type /fount for information on using this plugin.
+      default: false
