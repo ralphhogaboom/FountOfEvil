@@ -1,18 +1,13 @@
 package com.hideyourfire.ralphhogaboom.FountOfEvil;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import lib.PatPeter.SQLibrary.SQLite;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 public class Commands implements CommandExecutor {
@@ -34,11 +29,11 @@ public class Commands implements CommandExecutor {
 			if (args.length < 1) {
 				Main.getPlugin().getLogger().info("No arguments detected.");
 				sender.sendMessage("Type " + ChatColor.GOLD + "/fount list" + ChatColor.WHITE + " to show all a list of all custom mob spawn areas.");
-				sender.sendMessage("Type " + ChatColor.GOLD + "/fount add (ghast|pigzombie|spider|skeleton) amt name" + ChatColor.WHITE + " to add a new custom mob spawn area.");
+				sender.sendMessage("Type " + ChatColor.GOLD + "/fount add (creeper|spider|cavespider|skeleton|wither|ghast|pigzombie|endermite|slime|silverfish|giant) amt name" + ChatColor.WHITE + " to add a new custom mob spawn area.");
 				sender.sendMessage("Type " + ChatColor.GOLD + "/fount delete <ID>" + ChatColor.WHITE + " to remove one.");
 				return true;
 			}
-			if (args.length == 1) {
+			if (args.length > 1) {
 				if (args[0].equalsIgnoreCase("list")) {
 					sender.sendMessage("This command intentionally left blank.");
 					return true;
@@ -50,7 +45,7 @@ public class Commands implements CommandExecutor {
 						Player player = (Player) sender;
 						if (player.hasPermission("fount.admin")) {
 							// Check mob argument
-							if (args[1].equalsIgnoreCase("pigzombie") || args[1].equalsIgnoreCase("skeleton") || args[1].equalsIgnoreCase("spider") || args[1].equalsIgnoreCase("ghast")) {
+							if (args[1].equalsIgnoreCase("pigzombie") || args[1].equalsIgnoreCase("skeleton") || args[1].equalsIgnoreCase("spider") || args[1].equalsIgnoreCase("ghast") || args[1].equalsIgnoreCase("zombie") || args[1].equalsIgnoreCase("cavespider") || args[1].equalsIgnoreCase("creeper") || args[1].equalsIgnoreCase("endermite") || args[1].equalsIgnoreCase("blaze") || args[1].equalsIgnoreCase("magmacube") || args[1].equalsIgnoreCase("silverfish") || args[1].equalsIgnoreCase("skeleton") || args[1].equalsIgnoreCase("slime") || args[1].equalsIgnoreCase("witch") || args[1].equalsIgnoreCase("wither") || args[1].equalsIgnoreCase("zombie") || args[1].equalsIgnoreCase("guardian") || args[1].equalsIgnoreCase("giant")) {
 								// Check that argument is an integer between x and y.
 								if (parseWithDefault(args[2], 0) != 0) {
 									// Check that there's a spawn name.
@@ -60,9 +55,10 @@ public class Commands implements CommandExecutor {
 									}
 									// add spawn fount to the database.
 									sqlConnection();
-									String sqlInsert = "INSERT INTO founts (fountName, chunk, frequency, locX, locY, locZ, world, maxMobs, mob) VALUES ('" + fountName + "', '" + player.getLocation().getChunk().toString() + "', '" + 1 + "', " + player.getLocation().getX() + ", " + player.getLocation().getY() + ", " + player.getLocation().getZ() + ", '" + player.getWorld().toString() + "', " + args[2] + ", '" + args[1].toLowerCase() + "');";
+									String sqlInsert = "INSERT INTO founts (fountName, chunk, frequency, locX, locY, locZ, world, maxMobs, mob) VALUES ('" + fountName + "', 'x=" + player.getLocation().getChunk().getX() + "z=" + player.getLocation().getChunk().getZ() + "', '" + 1 + "', " + player.getLocation().getX() + ", " + player.getLocation().getY() + ", " + player.getLocation().getZ() + ", '" + player.getWorld().getName().toLowerCase() + "', " + args[2] + ", '" + args[1].toLowerCase() + "');";
 									try {
 										sqlite.query(sqlInsert);
+										sender.sendMessage("Fount created successfully.");
 										return true;
 									} catch (SQLException e) {
 										sender.sendMessage("Error saving Fount - check the console log for errors, or file a bug at github.com/ralphhogaboom.");
@@ -104,6 +100,7 @@ public class Commands implements CommandExecutor {
 		try {
 			sqlite.open();
 		} catch (Exception e) {
+			sqlite.close();
 			Main.getPlugin().getLogger().info(e.getMessage());
 		}
 	}

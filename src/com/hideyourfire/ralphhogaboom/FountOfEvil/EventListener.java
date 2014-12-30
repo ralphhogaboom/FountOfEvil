@@ -24,6 +24,7 @@ public class EventListener implements Listener {
 		try {
 		sqlite.open();
 		    } catch (Exception e) {
+				sqlite.close();
 		    	// Main.getPlugin().getLogger().info(e.getMessage());
 		    	Main.getPlugin().getLogger().info("Opening sqlite database failed. Does your host support sqlite?");
 		    	Main.getPlugin().onDisable();

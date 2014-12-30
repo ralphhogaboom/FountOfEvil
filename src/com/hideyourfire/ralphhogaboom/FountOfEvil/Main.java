@@ -2,6 +2,7 @@ package com.hideyourfire.ralphhogaboom.FountOfEvil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import lib.PatPeter.SQLibrary.SQLite;
 
@@ -9,15 +10,26 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Blaze;
+import org.bukkit.entity.CaveSpider;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Endermite;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Ghast;
+import org.bukkit.entity.Giant;
+import org.bukkit.entity.Guardian;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Silverfish;
 import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Slime;
 import org.bukkit.entity.Spider;
+import org.bukkit.entity.Witch;
 import org.bukkit.entity.Wither;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,11 +47,7 @@ public class Main extends JavaPlugin {
 		this.saveDefaultConfig(); // For first run, save default config file.
 		this.getConfig();
 		sqlConnection();
-		try {
-			sqlTableCheck();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		sqlTableCheck();
 		getCommand("fount").setExecutor(new Commands());
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
@@ -104,13 +112,16 @@ public class Main extends JavaPlugin {
 	}
 		
 	@SuppressWarnings("deprecation")
-	public void sqlTableCheck() throws SQLException {
+	public void sqlTableCheck() {
 	    if(sqlite.checkTable("founts")){
 	    	this.getLogger().info("Database founts opened; table 'founts' found.");
 	    	return;
 	    } else {
-	    	sqlite.query("CREATE TABLE founts (id INT PRIMARY KEY, fountName VARCHAR(50), chunk VARCHAR(50), frequency INT(3), locX INT(50), locY INT(50), locZ INT(50), world VARCHAR(50), mob VARCHAR(50));");
-	        sqlite.query("INSERT INTO founts(fountName, chunk, frequency, locX, locY, locZ, world, mob) VALUES('GhastPlaza', 'x=29z=-25', 10, 200, 84, 199, 'survival', 'ghast');"); //This is optional. You can do this later if you want.
+	    	try {
+				sqlite.query("CREATE TABLE founts (id INT PRIMARY KEY, fountName VARCHAR(50), chunk VARCHAR(50), frequency INT(3), locX INT(50), locY INT(50), locZ INT(50), maxMobs INT(50), world VARCHAR(50), mob VARCHAR(50));");
+			} catch (SQLException e) {
+				// e.printStackTrace();
+			}
 	        plugin.getLogger().info("founts has been created");
 	    }
 	}
@@ -135,18 +146,53 @@ public class Main extends JavaPlugin {
 			playerX = player.getLocation().getBlockX();
 			playerZ = player.getLocation().getBlockZ();
 			if (playerX > (X - 100) && playerX < (X + 100)) {
-				Main.getPlugin().getLogger().info(playerX + " > " + (X - 100) + " && " + playerX + " < " + (X + 100));
+				//Main.getPlugin().getLogger().info(playerX + " > " + (X - 100) + " && " + playerX + " < " + (X + 100));
 				if (playerZ > (Z - 100) && playerZ < (Z + 100)) {
-					Main.getPlugin().getLogger().info(playerZ + " > " + (Z - 100) + " && " + playerZ + " < " + (Z + 100));
-					Main.getPlugin().getLogger().info("Player " + player.getName() + " is near " + X + ", " + Z + ".");
-					if (mob.equalsIgnoreCase("spider")) {
-						loc.getWorld().spawnEntity(loc, EntityType.SPIDER);
+					//Main.getPlugin().getLogger().info(playerZ + " > " + (Z - 100) + " && " + playerZ + " < " + (Z + 100));
+					//Main.getPlugin().getLogger().info("Player " + player.getName() + " is near " + X + ", " + Z + ".");
+					if (mob.equalsIgnoreCase("blaze")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.BLAZE);
 						// Count all mobs in chunk, if they match this mob then add 'em up
 						int i = 0;
-						for (Entity ents : targetWorld.getChunkAt(loc).getEntities()) {
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
 							if (ents instanceof LivingEntity) {
 								LivingEntity lents = (LivingEntity) ents;
-								if (lents instanceof Spider) {
+								if (lents instanceof Blaze) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("creeper")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.CREEPER);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Creeper) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("endermite")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.ENDERMITE);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Endermite) {
 									++i;
 								}
 							}
@@ -156,10 +202,11 @@ public class Main extends JavaPlugin {
 						}
 					}
 					if (mob.equalsIgnoreCase("ghast")) {
-						loc.getWorld().spawnEntity(loc, EntityType.GHAST);
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.GHAST);
 						// Count all mobs in chunk, if they match this mob then add 'em up
 						int i = 0;
-						for (Entity ents : targetWorld.getChunkAt(loc).getEntities()) {
+						List<Entity> nearbyEntities = entity.getNearbyEntities(128, 128, 128);
+						for (Entity ents : nearbyEntities) {
 							if (ents instanceof LivingEntity) {
 								LivingEntity lents = (LivingEntity) ents;
 								if (lents instanceof Ghast) {
@@ -171,14 +218,83 @@ public class Main extends JavaPlugin {
 							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
 						}
 					}
-					if (mob.equalsIgnoreCase("pigzombie")) {
-						loc.getWorld().spawnEntity(loc, EntityType.PIG_ZOMBIE);
+					if (mob.equalsIgnoreCase("magmacube")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.MAGMA_CUBE);
 						// Count all mobs in chunk, if they match this mob then add 'em up
 						int i = 0;
-						for (Entity ents : targetWorld.getChunkAt(loc).getEntities()) {
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
 							if (ents instanceof LivingEntity) {
 								LivingEntity lents = (LivingEntity) ents;
-								if (lents instanceof PigZombie) {
+								if (lents instanceof MagmaCube) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("silverfish")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.SILVERFISH);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Silverfish) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("skeleton")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Skeleton) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("slime")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.SLIME);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Slime) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("witch")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.WITCH);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Witch) {
 									++i;
 								}
 							}
@@ -188,13 +304,116 @@ public class Main extends JavaPlugin {
 						}
 					}
 					if (mob.equalsIgnoreCase("wither")) {
-						loc.getWorld().spawnEntity(loc, EntityType.SKELETON);
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.WITHER);
 						// Count all mobs in chunk, if they match this mob then add 'em up
 						int i = 0;
-						for (Entity ents : targetWorld.getChunkAt(loc).getEntities()) {
+						List<Entity> nearbyEntities = entity.getNearbyEntities(64, 64, 64);
+						for (Entity ents : nearbyEntities) {
 							if (ents instanceof LivingEntity) {
 								LivingEntity lents = (LivingEntity) ents;
-								if (lents instanceof Skeleton) {
+								if (lents instanceof Wither) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("zombie")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.ZOMBIE);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Zombie) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("guardian")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.GUARDIAN);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Guardian) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("spider")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.SPIDER);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Spider) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("cavespider")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.CAVE_SPIDER);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof CaveSpider) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("giant")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.GIANT);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(128, 128, 128);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof Giant) {
+									++i;
+								}
+							}
+						}
+						if (i <= maxMobs) {
+							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
+						}
+					}
+					if (mob.equalsIgnoreCase("pigzombie")) {
+						Entity entity = loc.getWorld().spawnEntity(loc, EntityType.PIG_ZOMBIE);
+						// Count all mobs in chunk, if they match this mob then add 'em up
+						int i = 0;
+						List<Entity> nearbyEntities = entity.getNearbyEntities(32, 32, 32);
+						for (Entity ents : nearbyEntities) {
+							if (ents instanceof LivingEntity) {
+								LivingEntity lents = (LivingEntity) ents;
+								if (lents instanceof PigZombie) {
 									++i;
 								}
 							}
