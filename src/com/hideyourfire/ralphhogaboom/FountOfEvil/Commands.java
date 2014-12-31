@@ -29,12 +29,25 @@ public class Commands implements CommandExecutor {
 			if (args.length < 1) {
 				Main.getPlugin().getLogger().info("No arguments detected.");
 				sender.sendMessage("Type " + ChatColor.GOLD + "/fount list" + ChatColor.WHITE + " to show all a list of all custom mob spawn areas.");
-				sender.sendMessage("Type " + ChatColor.GOLD + "/fount add (creeper|spider|cavespider|skeleton|wither|ghast|pigzombie|endermite|slime|silverfish|giant) amt name" + ChatColor.WHITE + " to add a new custom mob spawn area.");
+				sender.sendMessage("Type " + ChatColor.GOLD + "/fount tpto <ID>" + ChatColor.WHITE + " to teleport to a specific fount.");
+				sender.sendMessage("Type " + ChatColor.GOLD + "/fount add <MOBNAME> <AMOUNT> description" + ChatColor.WHITE + " to add a new custom mob spawn area.");
 				sender.sendMessage("Type " + ChatColor.GOLD + "/fount delete <ID>" + ChatColor.WHITE + " to remove one.");
+				sender.sendMessage("Type " + ChatColor.GOLD + "/fount mobs" + ChatColor.WHITE + " to show all possible mob options when creating founts.");
 				return true;
-			}
-			if (args.length > 1) {
+			} else {
 				if (args[0].equalsIgnoreCase("list")) {
+					sender.sendMessage("This command intentionally left blank.");
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("mobs")) {
+					sender.sendMessage("Mob options available: blaze, creeper, spider, cavespider, skeleton, wither, ghast, pigzombie, endermite, slime, silverfish, giant.");
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("delete")) {
+					sender.sendMessage("This command intentionally left blank.");
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("tpto")) {
 					sender.sendMessage("This command intentionally left blank.");
 					return true;
 				}
@@ -85,10 +98,6 @@ public class Commands implements CommandExecutor {
 				if (args[0].equalsIgnoreCase("delete")) {
 					return true;
 				}
-				return true;
-			}
-			if (args.length == 2) {
-				Main.getPlugin().getLogger().info("2 arguments detected.");
 				return true;
 			}
 		}

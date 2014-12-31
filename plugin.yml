@@ -1,6 +1,6 @@
 name: FountOfEvil
 main: com.hideyourfire.ralphhogaboom.FountOfEvil.Main
-version: Aloha build 20141229-debug
+version: Aloha build 20141230-debug
 depend: [SQLibrary]
 permissions:
     fountofevil.admin:
