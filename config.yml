@@ -1,0 +1,37 @@
+#################################################
+#                  FOUNT OF EVIL                #
+#             custom plugin originally          #
+#                   written for                 #
+#              play.hideyourfire.com            #
+#                                               #
+#               config version 1.0              #
+#                                               #
+#################################################
+#
+# If something's not working right, enable this
+# before opening a ticket. Attach your server.log
+# file with the ticket, so I can see what's going
+# on.
+#  
+
+debug: false
+
+#
+# This is the max mobs that will spawn from 
+# founts. It's not recommended to set this
+# limit higher unless you know for sure what
+# you're doing. This is here to prevent
+# players from accidentally nerfing their
+# server (with 999 mobs instead of 9, for
+# example.
+#
+
+maxSpawnMobs: 10
+
+# This is the max founts that can be
+# created. If you change this higher,
+# make sure you're careful so that you
+# don't accidentally nerf your server
+# with too many mob spawning events.
+
+maxFounts: 10

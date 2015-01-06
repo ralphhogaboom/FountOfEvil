@@ -3,7 +3,9 @@ package com.hideyourfire.ralphhogaboom.FountOfEvil;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
 import lib.PatPeter.SQLibrary.SQLite;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -37,14 +39,23 @@ import com.hideyourfire.ralphhogaboom.FountOfEvil.Commands;
 public class Main extends JavaPlugin {
 	private static Plugin plugin;
 	public SQLite sqlite;
+	private boolean debug = false;
+	private int maxSpawnMobs = 0;
+	private int maxFounts = 0;
 	
 	public void onEnable() {	
 		plugin = this;
 		this.saveDefaultConfig(); // For first run, save default config file.
 		this.getConfig();
+		debug = this.getConfig().getBoolean("debug");
+		Main.getPlugin().getLogger().info("Show debug output: " + doDebug());
+		maxSpawnMobs = this.getConfig().getInt("maxSpawnMobs");
+		maxFounts = this.getConfig().getInt("maxFounts");
+		
+		
 		sqlConnection();
 		sqlTableCheck();
-		getCommand("fount").setExecutor(new Commands());
+		getCommand("fount").setExecutor(new Commands(this));
 		BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 		scheduler.scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
@@ -52,31 +63,51 @@ public class Main extends JavaPlugin {
 				doCheckAllFounts();
 			}
 		}, 0L, 999L);
+
+		// CHECK FOR MAX FOUNTS
+		if (doWarnOnMaxFounts()) {
+			Main.getPlugin().getLogger().info("Warning: max founts exceeded in the database. Only the first " + maxFounts + " founts will be loaded.");
+			Main.getPlugin().getLogger().info("Either reduce the number of founts in the database with /fount delete, or increase the maxFounts value in the config file.");
+		}
 	}
 	
 	private void doCheckAllFounts() {
 		sqlConnection();
-		String sqlQuery = "SELECT id, fountName, chunk, world, maxMobs, mob, locX, locY, locZ FROM founts;";
+		String sqlQuery = "SELECT id, fountName, chunk, world, maxMobs, mob, locX, locY, locZ FROM founts LIMIT " + maxFounts + ";";
 		ResultSet rs;
 		try {
 			rs = sqlite.query(sqlQuery);
 			try {
 				while (rs.next()) {
+					if (doDebug()) {
+						Main.getPlugin().getLogger().info("World: " + rs.getString("world"));
+						Main.getPlugin().getLogger().info("Chunk: " + rs.getString("chunk"));
+					}
 					World world = Bukkit.getWorld(rs.getString("world"));
 					String strX = rs.getString("chunk");
 					String strY = strX.substring(strX.indexOf("z"), strX.length());
-					strX = strX.substring(0, (strX.indexOf("z") - 1));
+					strX = strX.replace(strY, "");
 					strX = strX.substring(2);
 					strY = strY.substring(2);
+					if (doDebug()) {
+						Main.getPlugin().getLogger().info("strX: " + strX + "; strY = " + strY);
+					}
 					int intX = Integer.parseInt(strX);
 					int intY = Integer.parseInt(strY);
+					int intMaxSpawnMobs = 0;
+					if (rs.getInt("maxMobs") <= maxSpawnMobs) {
+						intMaxSpawnMobs = rs.getInt("maxMobs");
+					} else {
+						intMaxSpawnMobs = maxSpawnMobs;
+					}
 					Chunk chunk = world.getChunkAt(intX, intY);
 					// Check if chunk is loaded
 					if (chunk.isLoaded()) {
 						// Do runMobSpawnCheck
-						Main.runMobSpawnCheck(rs.getInt("locX"), rs.getInt("locY"), rs.getInt("locZ"), rs.getString("world"), rs.getString("mob"), rs.getInt("maxMobs"));
+						Main.runMobSpawnCheck(rs.getInt("locX"), rs.getInt("locY"), rs.getInt("locZ"), rs.getString("world"), rs.getString("mob"), intMaxSpawnMobs);
 					}
 				}
+				rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -104,15 +135,19 @@ public class Main extends JavaPlugin {
 	@SuppressWarnings("deprecation")
 	public void sqlTableCheck() {
 	    if(sqlite.checkTable("founts")){
-	    	this.getLogger().info("Database founts opened; table 'founts' found.");
+	    	if (doDebug()) {
+		    	this.getLogger().info("Database founts opened; table 'founts' found.");
+	    	}
 	    	return;
 	    } else {
 	    	try {
-				sqlite.query("CREATE TABLE founts (id INT PRIMARY KEY, fountName VARCHAR(50), chunk VARCHAR(50), frequency INT(3), locX INT(50), locY INT(50), locZ INT(50), maxMobs INT(50), world VARCHAR(50), mob VARCHAR(50));");
+				sqlite.query("CREATE TABLE founts (id INTEGER PRIMARY KEY AUTOINCREMENT, fountName VARCHAR(50), chunk VARCHAR(50), frequency INT(3), locX INT(50), locY INT(50), locZ INT(50), maxMobs INT(50), world VARCHAR(50), mob VARCHAR(50));");
 			} catch (SQLException e) {
-				// e.printStackTrace();
+				e.printStackTrace();
 			}
-	        plugin.getLogger().info("founts has been created");
+	    	if (doDebug()) {
+	    		plugin.getLogger().info("founts has been created");
+	    	}
 	    }
 	}
 
@@ -404,11 +439,32 @@ public class Main extends JavaPlugin {
 							runMobSpawnCheck(X, Y, Z, world, mob, maxMobs);
 						}
 					}
-
-
 				}
 			}
 		}
 	}
 
+	public boolean doDebug() {
+		return debug;
+	}
+
+
+	public boolean doWarnOnMaxFounts() {
+		// Check to warn if fount numbers exceed maxFounts in config.
+		boolean isMax = false;
+		try {
+			String sqlQuery = "SELECT Count(id) AS fountCount FROM founts;";
+			ResultSet rs = sqlite.query(sqlQuery);
+			while (rs.next()) {
+				if (rs.getInt("fountCount") > maxFounts) {
+					isMax = true;
+				}
+			}
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return isMax;
+	}
+	
 }
