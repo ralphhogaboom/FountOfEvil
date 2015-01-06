@@ -1,16 +1,12 @@
 name: FountOfEvil
 main: com.hideyourfire.ralphhogaboom.FountOfEvil.Main
-version: Aloha build 20141230-debug
+version: Aloha build 20150105
 depend: [SQLibrary]
 permissions:
     fountofevil.admin:
-        description: Null
-        default: false
-    fountofevil.player:
-        description: Null
+        description: Allows the player to create, list, and delete founts.
         default: false
 commands:
    fount:
       description: Creates a new custom spawn location for a specific mob type.
-      usage: Type /fount for information on using this plugin.
       default: false
